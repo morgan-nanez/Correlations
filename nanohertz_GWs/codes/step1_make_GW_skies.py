@@ -16,7 +16,8 @@ import collections
 import sys
 
 # Read in file name
-filename = sys.argv[1]
+#filename = sys.argv[1]
+filename = "morganTest01"
 
 # physical constants for natural units c = G = 1
 c=2.99792458*(10**8)
@@ -36,7 +37,7 @@ def M(m1,m2):  return s_mass*(m1+m2) # total mass
 
 def mchirp(m1,m2): return ((mu(m1,m2))**(3./5))*((M(m1,m2))**(2./5))  # chirp mass
 
-def mchirp_q(q,Mtot): 
+def mchirp_q(q,Mtot):
     """
     chirp mass in terms of q and M_tot. Answer in seconds.
     """
@@ -46,7 +47,7 @@ def mchirp_q(q,Mtot):
 def parsec2sec(d): return d*3.08568025e16/299792458
 
 
-# Functions related to galaxy catalogue 
+# Functions related to galaxy catalogue
 
 def Mk2mStar(mag):
     """
@@ -63,12 +64,27 @@ def Mbh2Mbulge(Mbulge):
     Includes scatter in the relation, \epsilon = 0.34
     Answer in solar masses.
     """
-    exponent = 8.46+1.05*log10(Mbulge/1e11)
+
+    '''exponent = 8.46+1.05*log10(Mbulge/1e11)
     ans_w_scatter = np.random.normal(exponent,0.34)
     #print locals()
-    return 10**ans_w_scatter
+    return 10**ans_w_scatter'''
 
-# For GWs: strain, GW frequency and time to coalescence 
+    #def KH13MassBulgeScatter(bulge):
+    '''first_scatter = np.random.normal(0.49, 0.06)
+    second_scatter = np.random.normal(1.16, 0.08)
+    ans = (first_scatter * pow((Mbulge / 1e11), second_scatter))
+    logM = log10(ans)
+    scatterM = np.random.normal(logM, 0.29) + 9
+    return 10**scatterM'''
+
+    #HR04
+    first_scatter = (np.random.normal(8.20, 0.1))
+    second_scatter = (np.random.normal(1.12, 0.06))
+    ans = np.random.normal((first_scatter+(second_scatter*log10(Mbulge/1e11))), 0.3)
+    return 10**(ans)
+
+# For GWs: strain, GW frequency and time to coalescence
 
 def strain(mass, dist, freq):
     """
@@ -142,9 +158,9 @@ def i_prob_wMc(chirpMass, min_freq, total_T):
 
 # In[6]:
 
-# Black hole merger timescales from galaxy merger timescale; Binney and Tremaine 1987 
+# Black hole merger timescales from galaxy merger timescale; Binney and Tremaine 1987
 # "Galactic Dynamics"; also Sesana and Khan 2015
-# "a" is computed by equating R_eff from Dabringhausen, Hilker & Kroupa (2008) Eq. 4 and 
+# "a" is computed by equating R_eff from Dabringhausen, Hilker & Kroupa (2008) Eq. 4 and
 
 def R_eff(Mstar):
     """
@@ -185,11 +201,11 @@ def tfric(Mstar,M2):
     #a = semiMaj_a(Mstar)/1e3 # make sure "a" units are kpc
     a = R_eff(Mstar)/1e3
     ans = 2.64e10*(a/2)**2*(vc/250)*(1e6/M2)
-    return ans/1e9 
+    return ans/1e9
 
 def rho_r(Mstar, gamma, r_var):
     """
-    gamma for Dehen profiles; Sesana & Khan 2015, Eq. 1 
+    gamma for Dehen profiles; Sesana & Khan 2015, Eq. 1
     r_const = r_0 or "a" in Dehen 1993
     r_var = "r" in Dehen 1993
     answer in seconds^-2
@@ -231,7 +247,7 @@ def t_hard(Mstar,q,gamma,Mtot):
     """
     a_val = parsec2sec(r0_sol(Mstar, gamma))
     H = 15
-    aStarGW = a_StarGW(Mstar,q,Mtot,gamma,H) 
+    aStarGW = a_StarGW(Mstar,q,Mtot,gamma,H)
     sigma_inf = sigmaVel(Mstar)*1000/c
     rinf_val = r_inf(Mstar,gamma,Mtot)
     rho_inf = rho_r(Mstar, gamma, rinf_val)
@@ -239,7 +255,7 @@ def t_hard(Mstar,q,gamma,Mtot):
     return ans/31536000/1e9, rinf_val
 
 # ## Parameters and functions for Illustris
-# constants for Illustris, Table 1 of Rodriguez-Gomez et al. (2016), assuming z = 0. 
+# constants for Illustris, Table 1 of Rodriguez-Gomez et al. (2016), assuming z = 0.
 
 M0 = 2e11 # solar masses
 A0 = 10**(-2.2287) # Gyr^-1
@@ -254,9 +270,9 @@ delta0 = 0.7668
 delta1 = -0.4695
 
 # For Illustris galaxy-galaxy merger rate
-# functions for Illustris, Table 1 of Rodriguez-Gomez et al. (2016), assuming z != 0. 
+# functions for Illustris, Table 1 of Rodriguez-Gomez et al. (2016), assuming z != 0.
 
-def A_z(z): return A0*(1+z)**eta 
+def A_z(z): return A0*(1+z)**eta
 def alpha(z): return alpha0*(1+z)**alpha1
 def beta(z): return beta0*(1+z)**beta1
 def delta(z): return delta0*(1+z)**delta1
@@ -282,7 +298,7 @@ def illus_merg(mustar, Mstar,z):
 
 def cumulative_merg_ill(mu_min, mu_max, Mstar, z):
     """
-    Cumulative merger probability over a range of mu^*. 
+    Cumulative merger probability over a range of mu^*.
     For major mergers, this is 0.25 to 1.0
     """
     ans, err = quad(illus_merg, mu_min, mu_max, args = (Mstar,z))
@@ -297,20 +313,20 @@ def i_prob_Illustris(Mstar, Mtot, q, min_freq):
     M2 = M1*q
     mu_min, mu_max = 0.25, 1.0
     gamma = 1.0 # for Hernquist profile, see Dehen 1993
-    
+
     #Mstar = Mstar*MzMnow(mu, sigma) # scale M* according to Figure 7 of de Lucia and Blaizot 2007
     MstarZ = 0.7*Mstar
     hardening_t, r_inf_here = t_hard(MstarZ,q,gamma,Mtot)
     friction_t = tfric(MstarZ,M2)
-    timescale = hardening_t + friction_t  # Gyrs 
-    
+    timescale = hardening_t + friction_t  # Gyrs
+
     #print "hardening timescale is (Gyrs) ", hardening_t
     #print "dynamical friction timescale is (Gyrs) ", friction_t
 
     # if timescale is longer than a Hubble time, 0 probability
     # also, if timescale > 12.25 Gyrs (z=4), no merging SMBHs
     # also limit of validity for Rodriguez-Gomez + fit in Table 1.
-    if timescale > 12.25: 
+    if timescale > 12.25:
         return 0, 'nan', timescale*1e9, 'nan', 'nan',  r_inf_here, friction_t, hardening_t
     else:
         z = z_at_value(Planck15.age, (13.79-timescale) * u.Gyr) # redshift of progenitor galaxies
@@ -324,21 +340,27 @@ def i_prob_Illustris(Mstar, Mtot, q, min_freq):
 
 # # Main Part of Code
 
-# ### Choose a galaxy catalog 
+# ### Choose a galaxy catalog
 
 # this is the revised list from Jenny with galaxy names in the final column
-catalog = np.loadtxt("2mass_GRP_earlyv3-25name_noStar2.lst", usecols = (1,2,3,4))
+#catalog = np.loadtxt("2mass_GRP_earlyv3-25name_noStar2.lst", usecols = (1,2,3,4))
 
-cat_name = np.genfromtxt("2mass_GRP_earlyv3-25name_noStar2.lst",  usecols=(5), dtype='str')
+#cat_name = np.genfromtxt("2mass_GRP_earlyv3-25name_noStar2.lst",  usecols=(5), dtype='str')
+
+
+
+catalog = np.loadtxt("../galaxy_data/2mass_galaxies.lst", usecols = (1,2,3,4))
+
+cat_name = np.genfromtxt("../galaxy_data/2mass_galaxies.lst",  usecols=(5), dtype='str')
 
 
 # ## List of supermassive black holes with dynamic mass measurements
 
-dyn_smbh_name = np.genfromtxt("schutzMa_extension.txt", usecols=(0), dtype='str', skip_header = 2)
-dyn_smbh_mass = np.genfromtxt("schutzMa_extension.txt", usecols = (4), skip_header = 2)
+dyn_smbh_name = np.genfromtxt("../galaxy_data/schutzMa_extension.txt", usecols=(0), dtype='str', skip_header = 2)
+dyn_smbh_mass = np.genfromtxt("../galaxy_data/schutzMa_extension.txt", usecols = (4), skip_header = 2)
 
-ext_catalog = np.loadtxt("added_Mks.lst", usecols = (1,2,3,4,5), skiprows = 2)
-ext_name = np.genfromtxt("added_Mks.lst", usecols=(0), dtype='str', skip_header = 2)
+ext_catalog = np.loadtxt("../galaxy_data/added_Mks.lst", usecols = (1,2,3,4,5), skiprows = 2)
+ext_name = np.genfromtxt("../galaxy_data/added_Mks.lst", usecols=(0), dtype='str', skip_header = 2)
 
 
 #dyn_smbh_mass.shape
@@ -381,20 +403,22 @@ p_i_vec = np.zeros([gal_no])
 chirp_mass_vec = np.zeros([gal_no])
 
 # minimum PTA frequency
-f_min = 1e-9 # 
+f_min = 1e-9 #
 
 # ## Create multiple gravitational-wave sky realizations from the catalog.
 
-real_tot = 2000 # number of realizations
+real_tot = 3 # number of realizations
 tot_gal_counter = np.zeros([real_tot]) # keeps track of the total number of galaxies for each realization (loop)
 
 # multiple realizations of the Universe
 for j in range(real_tot):
-    
+
     #t1 = time.time()
-    
+
     # array which holds the probablity of each binary being in PTA band and outputs from prob calcs.
     p_i_vec = np.zeros([gal_no])
+
+
     z_loop = np.zeros([gal_no])
     T_zLoop = np.zeros([gal_no])
     mergRate_loop = np.zeros([gal_no])
@@ -406,39 +430,46 @@ for j in range(real_tot):
     # initialize mass arrays
     chirp_mass_vec = np.zeros([gal_no])
     q_choice = np.zeros([gal_no])
-    
+
     m_bulge = Mk2mStar(k_mag) # inferred M* mass from k-band luminosity, Cappellari (2013)
     tot_mass = Mbh2Mbulge(m_bulge) # M-Mbulge McConnell & Ma
-        
+
     # Look for galaxies which have dynamical SMBH mass measurements, and replace their M-Mbulge total
     # mass with the dynamically measured one.
+
+
+
     qqq=0
+    "all_dyn_bh_name = 33"
+    "gal_no = 5119"
     for x in all_dyn_bh_name:
         if x in cat_name:
             bh_idx = cat_name.index(x)
             tot_mass[bh_idx] = all_dyn_bh_mass[qqq]
             qqq=qqq+1
-    
+
     for yy in range(gal_no):
         q_choice[yy] = np.random.choice(np.logspace(-0.6020599913279624,0,num=5000))  # random q > 0.25 each time
-    
+
     for xx in range(gal_no):
         chirp_mass_vec[xx] = mchirp_q(q_choice[xx], tot_mass[xx])/s_mass # chirp mass with that q, M_tot from catalogue
-     
+
      # prob of binary being in PTA band
     for zz in range(gal_no):
-        p_i_vec[zz], z_loop[zz], T_zLoop[zz], mergRate_loop[zz], t2c_loop[zz],  r_inf_loop[zz], friction_t_loop[zz], hardening_t_loop[zz] = i_prob_Illustris(m_bulge[zz], tot_mass[zz], q_choice[zz], f_min) 
-
+        p_i_vec[zz], z_loop[zz], T_zLoop[zz], mergRate_loop[zz], t2c_loop[zz],  r_inf_loop[zz], friction_t_loop[zz], hardening_t_loop[zz] = i_prob_Illustris(m_bulge[zz], tot_mass[zz], q_choice[zz], f_min)
     # number of stalled binaries
+
+
     num_zeros = (p_i_vec == 0).sum()
-    
     pta_sources = np.sum(p_i_vec)
-      
+
+
     # What is the prob. of a single galaxy being chosen?
+
     prob_of_each_gal = p_i_vec/pta_sources
-                                 
+
     no_of_samples = int(np.round(pta_sources))
-    
+
     # from "gal_no" choose "no_of_samples" with a probability of "p". The result is the index of the galaxy.
     gal_choice = np.random.choice(gal_no, no_of_samples, replace = False, p = prob_of_each_gal )
 
@@ -450,7 +481,8 @@ for j in range(real_tot):
     r_inf_list = []
     friction_list = []
     hardening_list = []
-    
+
+    #gal_choice = 22
     for pr in gal_choice:
         save_p.append(prob_of_each_gal[pr])
         T_z_list.append(T_zLoop[pr])
@@ -460,22 +492,24 @@ for j in range(real_tot):
         r_inf_list.append(r_inf_loop[pr])
         friction_list.append(friction_t_loop[pr])
         hardening_list.append(hardening_t_loop[pr])
-    
+
     # compute strain vectors
     strain_vec = np.empty([no_of_samples])
     RA_tot = np.empty([no_of_samples])
-    DEC_tot = np.empty([no_of_samples]) 
+    DEC_tot = np.empty([no_of_samples])
     gw_freq_vec = np.empty([no_of_samples])
     gal_cat_name = []
     dist_list = []
     mstar_list = []
     q_rec = []
     mchirp_rec = []
-    
+
     # Here gal_choice[kkk] gives you the correct index number in your arrays for the galaxy chosen
+
+    #range(no_of_samples) = around 20
     for kkk in range(no_of_samples):
         #print "printing choice of galaxy index ", gal_choice[kkk]
-        time2col = np.random.uniform(100,2.6e7) # uniform sampling in time to coalesecence, up to fmin, 
+        time2col = np.random.uniform(100,2.6e7) # uniform sampling in time to coalesecence, up to fmin,
         gw_freq_vec[kkk] = float(freq_gw_wMc(chirp_mass_vec[gal_choice[kkk]],time2col))
         strain_vec[kkk] = float(generic_strain_wMc(chirp_mass_vec[gal_choice[kkk]], distance[gal_choice[kkk]], freq_gw_wMc(chirp_mass_vec[gal_choice[kkk]],time2col)))
         RA_tot[kkk] = RA[gal_choice[kkk]]
@@ -485,16 +519,18 @@ for j in range(real_tot):
         mstar_list.append(k_mag[gal_choice[kkk]])
         q_rec.append(q_choice[gal_choice[kkk]])
         mchirp_rec.append(chirp_mass_vec[gal_choice[kkk]])
-      
+
     # Save realization
-    
-    dest_file = "../prelim_results/realization_skies/hercules/herc_"+str(j)+str("_")+str(filename)
-    
+
+    dest_file = "../prelim_results/realization_skies/HR04Sample/local_"+str(j)+str("_")+str(filename)
+
+
+#save_p
+
     result_file = open(dest_file, "a") # the a+ allows you to create the file and write to it.
     for R, D, F, S, C, Q, G, L, M, P, I, TZ, MR, T2C, Z, RE, FRI, HAR in zip(RA_tot, DEC_tot, gw_freq_vec, strain_vec, mchirp_rec,q_rec, gal_cat_name, dist_list, mstar_list, save_p, gal_choice, T_z_list, mergRate_list, t2c_list, z_list, r_inf_list, friction_list, hardening_list):
-        result_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18}\n'.format(R, D, F, S, C, Q, G, L, M, P, I, TZ, MR, T2C, Z, RE, FRI, HAR, num_zeros)) 
+        result_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18}\n'.format(R, D, F, S, C, Q, G, L, M, P, I, TZ, MR, T2C, Z, RE, FRI, HAR, num_zeros))
     result_file.close()
 
 # Helpful hint: if you want to count the number of realizations in your directory, do
 # >> ls -l | grep -v ^l | wc -l
-
