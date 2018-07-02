@@ -417,8 +417,6 @@ for j in range(real_tot):
 
 
     qqq=0
-    "all_dyn_bh_name = 33"
-    "gal_no = 5119"
     for x in all_dyn_bh_name:
         if x in cat_name:
             bh_idx = cat_name.index(x)
@@ -509,6 +507,9 @@ for j in range(real_tot):
     result_file.close()
 
 # multiple realizations of the Universe for STALLED
+
+tot_gal_counter = np.zeros([real_tot]) # keeps track of the total number of galaxies for each realization (loop)
+
 for j in range(real_tot):   
     # array which holds the probablity of each binary being in PTA band and outputs from prob calcs.
     p_i_vec = np.zeros([gal_no])

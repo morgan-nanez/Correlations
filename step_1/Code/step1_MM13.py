@@ -17,7 +17,7 @@ import sys
 
 # Read in file name
 #filename = sys.argv[1]
-filename = ""
+filename = "cluster"
 
 # physical constants for natural units c = G = 1
 c=2.99792458*(10**8)
@@ -64,7 +64,7 @@ def Mbh2Mbulge(Mbulge):
     Includes scatter in the relation, \epsilon = 0.34
     Answer in solar masses.
     """
-
+    #MM13
     exponent = 8.46+1.05*log10(Mbulge/1e11)
     ans_w_scatter = np.random.normal(exponent,0.34)
     return 10**ans_w_scatter
@@ -402,8 +402,6 @@ for j in range(real_tot):
 
 
     qqq=0
-    "all_dyn_bh_name = 33"
-    "gal_no = 5119"
     for x in all_dyn_bh_name:
         if x in cat_name:
             bh_idx = cat_name.index(x)
@@ -419,9 +417,8 @@ for j in range(real_tot):
      # prob of binary being in PTA band
     for zz in range(gal_no):
         p_i_vec[zz], z_loop[zz], T_zLoop[zz], mergRate_loop[zz], t2c_loop[zz],  r_inf_loop[zz], friction_t_loop[zz], hardening_t_loop[zz] = i_prob_Illustris(m_bulge[zz], tot_mass[zz], q_choice[zz], f_min)
+
     # number of stalled binaries
-
-
     num_zeros = (p_i_vec == 0).sum()
     pta_sources = np.sum(p_i_vec)
 
@@ -444,7 +441,7 @@ for j in range(real_tot):
     friction_list = []
     hardening_list = []
 
-    #gal_choice = 22
+
     for pr in gal_choice:
         save_p.append(prob_of_each_gal[pr])
         T_z_list.append(T_zLoop[pr])
@@ -487,15 +484,10 @@ for j in range(real_tot):
     dest_file = "../Data/MM13_Reg/test01/mm13reg_"+str(j)+str("_")+str(filename)
 
 
-#save_p
-
     result_file = open(dest_file, "a") # the a+ allows you to create the file and write to it.
     for R, D, F, S, C, Q, G, L, M, P, I, TZ, MR, T2C, Z, RE, FRI, HAR in zip(RA_tot, DEC_tot, gw_freq_vec, strain_vec, mchirp_rec,q_rec, gal_cat_name, dist_list, mstar_list, save_p, gal_choice, T_z_list, mergRate_list, t2c_list, z_list, r_inf_list, friction_list, hardening_list):
         result_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18}\n'.format(R, D, F, S, C, Q, G, L, M, P, I, TZ, MR, T2C, Z, RE, FRI, HAR, num_zeros))
     result_file.close()
-
-# Helpful hint: if you want to count the number of realizations in your directory, do
-# >> ls -l | grep -v ^l | wc -l
 
 
 #STALLED
@@ -542,13 +534,11 @@ for j in range(real_tot):
 
     # number of stalled binaries
     num_stalled = (p_i_vec == 0).sum()
-    
     prob_of_each_gal = p_i_vec/num_stalled
     
     
     # gets gal number when probability is 0
     gal_choice = [gal for gal in range(gal_no) if p_i_vec[gal] == 0]    
-    
     
     save_p = []
     z_list = []

@@ -17,7 +17,7 @@ import sys
 
 # Read in file name
 #filename = sys.argv[1]
-filename = "morganTest01"
+filename = "test"
 
 # physical constants for natural units c = G = 1
 c=2.99792458*(10**8)
@@ -135,14 +135,8 @@ def i_prob_wMc(chirpMass, min_freq, total_T):
     return ans
 
 
-# In[ ]:
-
-
-
-
 # ## Hardening and Dynamical Friction Timescales
 
-# In[6]:
 
 # Black hole merger timescales from galaxy merger timescale; Binney and Tremaine 1987
 # "Galactic Dynamics"; also Sesana and Khan 2015
@@ -425,8 +419,6 @@ for j in range(real_tot):
 
 
     qqq=0
-    "all_dyn_bh_name = 33"
-    "gal_no = 5119"
     for x in all_dyn_bh_name:
         if x in cat_name:
             bh_idx = cat_name.index(x)
@@ -509,9 +501,6 @@ for j in range(real_tot):
 
     dest_file = "../Data/HR04_Reg/test01/hr04reg_"+str(j)+str("_")+str(filename)
 
-
-#save_p
-
     result_file = open(dest_file, "a") # the a+ allows you to create the file and write to it.
     for R, D, F, S, C, Q, G, L, M, P, I, TZ, MR, T2C, Z, RE, FRI, HAR in zip(RA_tot, DEC_tot, gw_freq_vec, strain_vec, mchirp_rec,q_rec, gal_cat_name, dist_list, mstar_list, save_p, gal_choice, T_z_list, mergRate_list, t2c_list, z_list, r_inf_list, friction_list, hardening_list):
         result_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18}\n'.format(R, D, F, S, C, Q, G, L, M, P, I, TZ, MR, T2C, Z, RE, FRI, HAR, num_zeros))
@@ -564,13 +553,10 @@ for j in range(real_tot):
 
     # number of stalled binaries
     num_stalled = (p_i_vec == 0).sum()
-    
     prob_of_each_gal = p_i_vec/num_stalled
-    
     
     # gets gal number when probability is 0
     gal_choice = [gal for gal in range(gal_no) if p_i_vec[gal] == 0]    
-    
     
     save_p = []
     z_list = []
