@@ -386,7 +386,7 @@ f_min = 1e-9 #
 
 
 ##REAL
-real_tot = 3 # number of realizations
+real_tot = 10,000 # number of realizations
 tot_gal_counter = np.zeros([real_tot]) # keeps track of the total number of galaxies for each realization (loop)
 
 # multiple realizations of the Universe
