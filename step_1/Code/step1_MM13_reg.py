@@ -497,3 +497,117 @@ for j in range(real_tot):
 
 # Helpful hint: if you want to count the number of realizations in your directory, do
 # >> ls -l | grep -v ^l | wc -l
+
+
+#STALLED
+tot_gal_counter = np.zeros([real_tot]) # keeps track of the total number of galaxies for each realization (loop)
+
+# multiple realizations of the Universe
+for j in range(real_tot):   
+    # array which holds the probablity of each binary being in PTA band and outputs from prob calcs.
+    p_i_vec = np.zeros([gal_no])
+    z_loop = np.zeros([gal_no])
+    T_zLoop = np.zeros([gal_no])
+    mergRate_loop = np.zeros([gal_no])
+    t2c_loop = np.zeros([gal_no])
+    r_inf_loop = np.zeros([gal_no])
+    friction_t_loop = np.zeros([gal_no])
+    hardening_t_loop = np.zeros([gal_no])
+    
+    # initialize mass arrays
+    chirp_mass_vec = np.zeros([gal_no])
+    q_choice = np.zeros([gal_no])
+    
+    m_bulge = Mk2mStar(k_mag) # inferred M* mass from k-band luminosity, Cappellari (2013)
+    tot_mass = Mbh2Mbulge(m_bulge) # M-Mbulge McConnell & Ma
+        
+    # Look for galaxies which have dynamical SMBH mass measurements, and replace their M-Mbulge total
+    # mass with the dynamically measured one.
+    qqq=0
+    for x in all_dyn_bh_name:
+        if x in cat_name:
+            bh_idx = cat_name.index(x)
+            tot_mass[bh_idx] = all_dyn_bh_mass[qqq]
+            qqq=qqq+1
+    
+    for yy in range(gal_no):
+        q_choice[yy] = np.random.choice(np.logspace(-0.6020599913279624,0,num=5000))  # random q > 0.25 each time
+    
+    for xx in range(gal_no):
+        chirp_mass_vec[xx] = mchirp_q(q_choice[xx], tot_mass[xx])/s_mass # chirp mass with that q, M_tot from catalogue
+     
+    # prob of binary being in PTA band
+    for zz in range(gal_no):
+        p_i_vec[zz], z_loop[zz], T_zLoop[zz], mergRate_loop[zz], t2c_loop[zz],r_inf_loop[zz], friction_t_loop[zz], hardening_t_loop[zz] = \
+        i_prob_Illustris(m_bulge[zz], tot_mass[zz], q_choice[zz], f_min) 
+
+    # number of stalled binaries
+    num_stalled = (p_i_vec == 0).sum()
+    
+    prob_of_each_gal = p_i_vec/num_stalled
+    
+    
+    # gets gal number when probability is 0
+    gal_choice = [gal for gal in range(gal_no) if p_i_vec[gal] == 0]    
+    
+    
+    save_p = []
+    z_list = []
+    T_z_list = []
+    mergRate_list=[]
+    t2c_list = []
+    r_inf_list = []
+    friction_list = []
+    hardening_list = []
+    
+    for pr in gal_choice:
+        save_p.append(prob_of_each_gal[pr])
+        T_z_list.append(T_zLoop[pr])
+        mergRate_list.append(mergRate_loop[pr])
+        t2c_list.append(t2c_loop[pr])
+        z_list.append(z_loop[pr])
+        r_inf_list.append(r_inf_loop[pr])
+        friction_list.append(friction_t_loop[pr])
+        hardening_list.append(hardening_t_loop[pr])
+    
+    # compute strain vectors
+    strain_vec = np.empty([num_stalled])
+    RA_tot = np.empty([num_stalled])
+    DEC_tot = np.empty([num_stalled]) 
+    gw_freq_vec = np.empty([num_stalled])
+    gal_cat_name = []
+    dist_list = []
+    mstar_list = []
+    q_rec = []
+    mchirp_rec = []
+    
+    # Here gal_choice[kkk] gives you the correct index number in your arrays for the galaxy chosen
+    for kkk in range(num_stalled):
+        #print "printing choice of galaxy index ", gal_choice[kkk]
+        time2col = np.random.uniform(100,2.6e7) # uniform sampling in time to coalesecence, up to fmin, 
+        gw_freq_vec[kkk] = float(freq_gw_wMc(chirp_mass_vec[gal_choice[kkk]],time2col))
+        strain_vec[kkk] = float(generic_strain_wMc(chirp_mass_vec[gal_choice[kkk]], distance[gal_choice[kkk]], \
+                                                   freq_gw_wMc(chirp_mass_vec[gal_choice[kkk]],time2col)))
+        RA_tot[kkk] = RA[gal_choice[kkk]]
+        DEC_tot[kkk] = DEC[gal_choice[kkk]]
+        gal_cat_name.append(cat_name[gal_choice[kkk]])
+        dist_list.append(distance[gal_choice[kkk]])
+        mstar_list.append(k_mag[gal_choice[kkk]])
+        q_rec.append(q_choice[gal_choice[kkk]])
+        mchirp_rec.append(chirp_mass_vec[gal_choice[kkk]])
+      
+    # Save realization
+      
+    dest_file = "../Data/MM13_Stalled/test01/mm13stalled_"+str(j)+str("_")+str(filename)
+    #str(filename)
+
+    
+    result_file = open(dest_file, "a") # the a+ allows you to create the file and write to it.
+    for R, D, F, S, C, Q, G, L, M, P, I, TZ, MR, T2C, Z, RE, FRI, HAR in zip(RA_tot, DEC_tot, \
+            gw_freq_vec, strain_vec, mchirp_rec,q_rec, gal_cat_name, dist_list, mstar_list, save_p, \
+            gal_choice, T_z_list, mergRate_list, t2c_list, z_list, r_inf_list, friction_list, hardening_list):
+        result_file.write('{0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12} {13} {14} {15} {16} {17} {18}\n'.format(R, D, F, S, C, Q, G, L, M, P, I, TZ, MR, T2C, Z, RE, FRI, HAR, num_stalled)) 
+    result_file.close()
+    
+
+
