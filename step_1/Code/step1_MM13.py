@@ -16,8 +16,8 @@ import collections
 import sys
 
 # Read in file name
-#filename = sys.argv[1]
-filename = "cluster"
+arg_number = int(sys.argv[1])
+filename = "test"
 
 # physical constants for natural units c = G = 1
 c=2.99792458*(10**8)
@@ -369,11 +369,11 @@ f_min = 1e-9 #
 
 # ## Create multiple gravitational-wave sky realizations from the catalog.
 
-real_tot = 10000 # number of realizations
+real_tot = 250 # number of realizations
 tot_gal_counter = np.zeros([real_tot]) # keeps track of the total number of galaxies for each realization (loop)
 
 # multiple realizations of the Universe
-for j in range(real_tot):
+for j in range(arg_number, arg_number+real_tot):
 
     #t1 = time.time()
 
@@ -494,7 +494,7 @@ for j in range(real_tot):
 tot_gal_counter = np.zeros([real_tot]) # keeps track of the total number of galaxies for each realization (loop)
 
 # multiple realizations of the Universe
-for j in range(real_tot):   
+for j in range(arg_number, arg_number+real_tot):   
     # array which holds the probablity of each binary being in PTA band and outputs from prob calcs.
     p_i_vec = np.zeros([gal_no])
     z_loop = np.zeros([gal_no])
