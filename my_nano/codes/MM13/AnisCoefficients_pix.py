@@ -8,6 +8,8 @@ import scipy.linalg as sl, scipy.special as ss
 Script to compute the correlation absis-functions for various anisotropic
 configurations of the GW background energy-density
 -- Rutger van Haasteren (June 2014-September 2014)
+
+from https://github.com/jellis18/PAL2/blob/master/PAL2/AnisCoefficients_pix.py
 """
 
 
